@@ -1,6 +1,19 @@
-# passk
+<h1 align="center">Passk</h1>
 
+<p align="center"><b>Reliability, cost and regression gating for <a href="https://inspect.aisi.org.uk/">Inspect AI</a> eval logs.</b><br>How often does an agent succeed <i>every</i> time, what does a success cost, and is this version really better or worse than the last?</p>
+
+<p align="center">
+  <a href="https://github.com/sainikethkosaraju/passk/actions/workflows/ci.yml"><img src="https://github.com/sainikethkosaraju/passk/actions/workflows/ci.yml/badge.svg" alt="CI status"></a>
+  <img src="https://img.shields.io/badge/python-3.10%2B-blue" alt="Python 3.10+">
+  <img src="https://img.shields.io/badge/license-MIT-green" alt="MIT license">
+</p>
+
+<p align="center"><a href="#quickstart">Quickstart</a> · <a href="#evidence">Evidence</a> · <a href="#limitations">Limitations</a> · <a href="docs/method.md">Method</a> · <a href="docs/landscape.md">Landscape</a></p>
+
+---
 Statistics, cost and regression gating for [Inspect AI](https://inspect.aisi.org.uk/) eval logs. It answers: how reliable is this agent (**pass^k**, with honest intervals), what does a success cost, and is this version really better or worse than the last, *as a decision a CI job can make*.
+
+## Quickstart
 
 ```bash
 pip install "passk[inspect]"                       # reader needs no deps; extras add .eval (zstd) + Inspect hooks
@@ -23,7 +36,7 @@ Inspect .json/.eval(zstd) --> logs.py --> stats.py (estimators, bootstrap, tests
 inspect_ext.py: hook (reports) + ModelAPI "passk" (record/replay)       importers/ -> Inspect task + import_report.md
 ```
 
-## Results, all reproducible
+## Evidence
 | Claim | Evidence |
 | --- | --- |
 | Estimators equal exact enumeration, are unbiased for p^k, and **match Inspect's `pass_k`/`pass_at` reducers on real Inspect logs** | `tests/test_metrics_stats.py`, `tests/test_inspect_integration.py` |
@@ -34,7 +47,10 @@ inspect_ext.py: hook (reports) + ModelAPI "passk" (record/replay)       importer
 | Imported OpenAI eval runs in Inspect and scores | `tests/test_importer.py` |
 | Cost matches hand computation incl. cached + long-context tiers | `tests/test_logs_cost.py` |
 
-## Limitations (plain words)
+### Live runs
+- Collector and smoke workflow ran against a real hosted model (`nvidia/nemotron-3-ultra-550b-a55b`): 25 trials, 0 errors, [run log](https://github.com/sainikethkosaraju/passk/actions/runs/41409208959). The task was trivial arithmetic, so pass^1 = 1.0 says the pipeline works, not that the model is reliable. Provider terms have not been reviewed, so no model numbers are published as results.
+
+## Limitations
 - Evaluated on **mock-model logs** produced by real Inspect (`mockllm`): they validate parsing and statistics, not any real model's behaviour. No real-model benchmark is published here.
 - Intervals are conservative (over-cover, ~97-99%) for k >= 2; power is not tuned.
 - Success = every scorer correct; partial credit is not modelled. Errored samples count as failures.
@@ -53,3 +69,12 @@ Copy `.env.example` to `.env` (git-ignored). Passk needs no keys; provider keys 
 Written with Claude Code. Every claim above links to a test or a script.
 
 MIT. See [CONTRIBUTING](CONTRIBUTING.md), [SECURITY](SECURITY.md), [CHANGELOG](CHANGELOG.md).
+
+## The stack
+Three independent, MIT-licensed repositories that answer one question: *how do you let an agent touch real data and take real actions, and prove it behaves?*
+
+| Repo | Role |
+| --- | --- |
+| [**ontolite**](https://github.com/sainikethkosaraju/ontolite) | the governed data layer: typed objects, staged actions, per-principal answers, tamper-evident audit |
+| [**toolpin**](https://github.com/sainikethkosaraju/toolpin) | the trust layer between agent and tools: pinned definitions, information-flow control, approvals bound to the exact call |
+| [**passk**](https://github.com/sainikethkosaraju/passk) | the measurement layer: reliability (pass^k) with honest intervals, cost per success, regression gates |
