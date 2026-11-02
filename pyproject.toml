@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "passk"
-version = "0.2.0"
+version = "0.3.0"
 description = "Reliability (pass^k), cost and regression gating for Inspect AI eval logs."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -13,8 +13,11 @@ authors = [{ name = "Niketh" }]
 dependencies = []
 
 [project.optional-dependencies]
-otlp = ["opentelemetry-sdk==1.27.0", "opentelemetry-exporter-otlp-proto-http==1.27.0"]
-dev = ["pytest>=8", "hypothesis>=6", "ruff>=0.6", "pyright>=1.1.380"]
+otlp = ["opentelemetry-sdk>=1.27", "opentelemetry-exporter-otlp-proto-http>=1.27"]
+eval = ["zstandard>=0.22"]
+legacy-import = ["pyyaml>=6"]
+inspect = ["inspect-ai>=0.3.100", "zstandard>=0.22"]
+dev = ["pytest>=8", "hypothesis>=6", "ruff>=0.6", "pyright>=1.1.380", "zstandard>=0.22", "opentelemetry-sdk>=1.27", "pyyaml>=6"]
 
 [project.scripts]
 passk = "passk.cli:main"
@@ -29,7 +32,8 @@ line-length = 100
 src = ["src", "tests"]
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP"]
-ignore = ["UP007", "UP045", "E701", "E702", "E501", "B905"]
+ignore = ["UP007", "UP045", "E701", "E702", "E501", "B905", "E731", "B023", "B008"]
+per-file-ignores = { "examples/*" = ["E402"] }
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -38,3 +42,6 @@ addopts = "-q"
 [tool.pyright]
 include = ["src"]
 pythonVersion = "3.10"
+
+[project.entry-points.inspect_ai]
+passk = "passk.inspect_ext"

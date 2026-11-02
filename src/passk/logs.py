@@ -11,6 +11,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from passk._zipzstd import read_member
+
 KNOWN_SAMPLE_KEYS = {
     "id", "epoch", "input", "target", "messages", "output", "scores", "metadata", "store",
     "events", "model_usage", "role_usage", "started_at", "completed_at", "total_time",
@@ -33,6 +35,9 @@ class Trial:
     reasoning_tokens: int = 0
     latency: float | None = None
     status: str = "ok"  # ok | error
+    run_id: str = ""
+    limit: str | None = None  # a sample limit (token/message/time/...) ended the trial
+    messages: int = 0
 
 
 @dataclass
@@ -43,13 +48,25 @@ class TrialTable:
     def tasks(self) -> list[str]:
         return sorted({t.sample_id for t in self.trials})
 
-    def counts(self) -> dict[str, tuple[int, int]]:
+    def counts(self, model: str | None = None) -> dict[str, tuple[int, int]]:
         """sample_id -> (n_trials, n_successes). Errored trials count as failures."""
         out: dict[str, list[int]] = {}
         for t in self.trials:
+            if model is not None and t.model != model:
+                continue
             n, c = out.setdefault(t.sample_id, [0, 0])
             out[t.sample_id] = [n + 1, c + int(t.success)]
         return {k: (v[0], v[1]) for k, v in out.items()}
+
+    def for_model(self, model: str) -> TrialTable:
+        return TrialTable([t for t in self.trials if t.model == model], list(self.warnings))
+
+    def trials_by_task(self, model: str | None = None) -> dict[str, list[Trial]]:
+        out: dict[str, list[Trial]] = {}
+        for t in self.trials:
+            if model is None or t.model == model:
+                out.setdefault(t.sample_id, []).append(t)
+        return out
 
     def models(self) -> list[str]:
         return sorted({t.model for t in self.trials})
@@ -82,11 +99,12 @@ def _value_ok(v: Any) -> bool:
 def _load_raw(path: Path) -> dict[str, Any]:
     if path.suffix == ".eval":
         with zipfile.ZipFile(path) as z:
-            names = z.namelist()
-            header = json.loads(z.read("header.json")) if "header.json" in names else {}
+            infos = {i.filename: i for i in z.infolist()}
+            header = (json.loads(read_member(path, z, infos["header.json"]))
+                      if "header.json" in infos else {})
             samples = []
-            for n in sorted(x for x in names if x.startswith("samples/") and x.endswith(".json")):
-                samples.append(json.loads(z.read(n)))
+            for n in sorted(x for x in infos if x.startswith("samples/") and x.endswith(".json")):
+                samples.append(json.loads(read_member(path, z, infos[n])))
             header["samples"] = samples
             return header
     return json.loads(path.read_text())
@@ -94,8 +112,13 @@ def _load_raw(path: Path) -> dict[str, Any]:
 
 def read_log(path: str | Path, table: TrialTable | None = None) -> TrialTable:
     path = Path(path)
-    table = table or TrialTable()
-    raw = _load_raw(path)
+    return read_log_dict(_load_raw(path), table or TrialTable(), name=path.name, stem=path.stem)
+
+
+def read_log_dict(raw: dict[str, Any], table: TrialTable, name: str = "log",
+                  stem: str | None = None) -> TrialTable:
+    """Parse an already-loaded Inspect log (dict form) into `table`."""
+    path = Path(name)
     ev = raw.get("eval", {}) or {}
     model = ev.get("model", "unknown")
     unknown: set[str] = set()
@@ -111,7 +134,7 @@ def read_log(path: str | Path, table: TrialTable | None = None) -> TrialTable:
         errored = bool(s.get("error"))
         table.trials.append(
             Trial(
-                task=ev.get("task", path.stem),
+                task=ev.get("task", stem or path.stem),
                 sample_id=str(s.get("id")),
                 epoch=int(s.get("epoch", 1)),
                 success=(not errored) and score_to_success(s.get("scores")),
@@ -122,6 +145,9 @@ def read_log(path: str | Path, table: TrialTable | None = None) -> TrialTable:
                 reasoning_tokens=reason,
                 latency=s.get("total_time"),
                 status="error" if errored else "ok",
+                run_id=str(ev.get("run_id", "")),
+                limit=(s.get("limit") or {}).get("type") if isinstance(s.get("limit"), dict) else None,
+                messages=len(s.get("messages") or []),
             )
         )
     if unknown:

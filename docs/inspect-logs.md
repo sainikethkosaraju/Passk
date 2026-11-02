@@ -1,9 +1,3 @@
-# Inspect log fields used (T0.5)
-Observed on a real `inspect-ai 0.3.287` JSON log (keys of a sample): id, epoch, input, target,
-messages, output, scores, metadata, store, events, model_usage, role_usage, started_at,
-completed_at, total_time, working_time, uuid, error, error_retries, attachments, events_data,
-turn_count. Passk reads: id, epoch, scores, model_usage (input/output/cache-read/reasoning
-tokens), total_time, error, plus `eval.task`, `eval.model`, `status`.
-Limitation: a full live eval could not be run in the build sandbox (tiktoken download blocked), so
-the sample logs are synthetic in that schema. `.eval` (zip) logs are supported and unit-tested with a
-synthetic archive.
+# Inspect log fields used
+Validated on logs written by real `inspect-ai 0.3.287` (`mockllm`), both `.json` and `.eval`. `.eval` is a zip whose members are **zstd-compressed (method 93)**, which Python's `zipfile` cannot read; `passk._zipzstd` locates member bytes via the central directory and decompresses with `zstandard` (extra `passk[eval]`). Fields read: `eval.task/model/run_id`, `status`, per sample `id, epoch, scores, model_usage (input/output/cache-read/reasoning), total_time, error, limit, messages`. Unknown sample fields are listed in the report warnings.
+Generating the committed logs: `python examples/make_inspect_logs.py DIR` (a whitespace tokenizer replaces tiktoken's vocabulary download when the network blocks it; this only affects token counts).

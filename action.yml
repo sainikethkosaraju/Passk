@@ -1,0 +1,22 @@
+name: Passk gate
+description: Fail a pull request when agent reliability (pass^k) regresses, using Passk's paired inference.
+inputs:
+  baseline: { description: "Directory of baseline Inspect logs", required: true }
+  candidate: { description: "Directory of candidate Inspect logs", required: true }
+  k: { description: "k for pass^k", default: "1" }
+  max-drop: { description: "Tolerated drop in pass^k", default: "0.05" }
+  mode: { description: "point | significant | noninferior", default: "significant" }
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-python@v5
+      with: { python-version: "3.12" }
+    - run: pip install "passk[eval] @ git+https://github.com/${{ github.action_repository }}@${{ github.action_ref }}"
+      shell: bash
+    - shell: bash
+      run: |
+        set +e
+        passk gate --baseline "${{ inputs.baseline }}" --candidate "${{ inputs.candidate }}" \
+          -k "${{ inputs.k }}" --max-drop "${{ inputs.max-drop }}" --mode "${{ inputs.mode }}" \
+          --format markdown | tee "$GITHUB_STEP_SUMMARY"
+        exit "${PIPESTATUS[0]}"

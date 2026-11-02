@@ -1,56 +1,55 @@
 # passk
 
-Reliability and cost layer for [Inspect AI](https://inspect.aisi.org.uk/) eval logs: how often does an agent succeed **every** time, at what cost, and did a change make it better or worse?
+Statistics, cost and regression gating for [Inspect AI](https://inspect.aisi.org.uk/) eval logs. It answers: how reliable is this agent (**pass^k**, with honest intervals), what does a success cost, and is this version really better or worse than the last, *as a decision a CI job can make*.
 
 ```bash
-pip install -e .                              # no runtime dependencies
-passk report examples/logs/sample_a.json      # pass^k, pass@k, intervals, shadow cost, flaky tasks
-passk gate --baseline examples/logs/sample_a.json --candidate examples/logs/sample_b_regressed.json --max-drop 0.05   # exits 1
+pip install "passk[inspect]"                       # reader needs no deps; extras add .eval (zstd) + Inspect hooks
+passk report logs/ --out report/                    # per-model pass^k/pass@k + CIs, shadow cost, flaky tasks, HTML
+passk gate --baseline main-logs/ --candidate pr-logs/ --mode noninferior --max-drop 0.05
 ```
+
+## What it adds to Inspect (and what it does not)
+Inspect already ships the pass^k estimator (`pass_k` reducer). Passk **uses the same estimator and tests that it matches Inspect's** on real logs. What Inspect does not do, and Passk does ([teardown](docs/landscape.md)):
+- **Inference.** Two-stage Jeffreys-smoothed bootstrap over tasks *and* trials; Bayesian per-task reliability that extrapolates past the trials you ran; paired exact randomisation tests; Holm correction across k; minimum-detectable-effect and sample-size tools.
+- **Decisions.** `compare` returns `regressed | improved | inconclusive` and *refuses* to call significance on too few trials; `gate` has `point`, `significant` and `noninferior` modes, markdown output for PR comments, and exit code 2 for "not enough data".
+- **Cost.** Real LiteLLM price snapshot (hash recorded, per-model resolution provenance), cost per success with a bootstrap CI, Pareto frontier.
+- **Inspect-native tools.** `PASSK_REPORT=1` writes a report after every `inspect eval`; model provider `passk/record/<model>` and `passk/replay/<model>` give deterministic, zero-cost replays whose cassette key includes the epoch.
+- **Migration.** `import-openai` turns an OpenAI Evals export into a *runnable* Inspect task and lists everything it could not convert.
 
 ## How it works
 ```
-Inspect logs (.json/.eval) -> logs.py (trial table) -> metrics.py (pass^k, pass@k, Wilson, bootstrap)
-                                                    -> cost.py (dated price snapshot)
-                                                    -> compare.py / flaky.py -> report/ (JSON + HTML) -> cli.py gate
+Inspect .json/.eval(zstd) --> logs.py --> stats.py (estimators, bootstrap, tests) --> compare.py --> cli gate
+                                      \-> cost.py (priced, resolved) -> report/ (JSON v2 + HTML) -> otel.py (GenAI spans)
+inspect_ext.py: hook (reports) + ModelAPI "passk" (record/replay)       importers/ -> Inspect task + import_report.md
 ```
-`pass^k` = C(c,k)/C(n,k), `pass@k` = 1-C(n-c,k)/C(n,k); see [docs/method.md](docs/method.md).
 
-## Commands
-| Command | What |
-| --- | --- |
-| `passk report LOGS [--out DIR] [--otel spans.jsonl]` | per-task + overall metrics, JSON and static HTML |
-| `passk compare A B [-k N]` | paired verdict: regressed / improved / inconclusive (refuses below 5 trials/task) |
-| `passk cost LOGS` | shadow cost and cost per success |
-| `passk gate --baseline A --candidate B --max-drop 0.05` | CI gate, exit 1 on regression |
-| `passk import-openai EXPORT_DIR --out DIR` | OpenAI Evals export -> Inspect task + `import_report.md` |
-
-Python API: `passk.metrics.pass_hat_k(n, c, k)`, `pass_at_k(n, c, k)`, `passk.cost.price(usage, model)`.
-Also: `passk.graders` (state, tool-call, model grader with Unknown + calibration), `passk.cassette`, `passk.pacing`, `passk.otel`.
-
-## Verified claims
+## Results, all reproducible
 | Claim | Evidence |
 | --- | --- |
-| Estimators equal exact enumeration; pass^1 = pass@1; pass^k non-increasing | [tests/test_metrics.py](tests/test_metrics.py) |
-| Intervals reach nominal coverage (seeded simulation) | `test_wilson_coverage`, `test_bootstrap_coverage_over_tasks` |
-| Gate catches injected regression, passes noise | [tests/test_compare_cli.py](tests/test_compare_cli.py), data from [examples/make_sample_logs.py](examples/make_sample_logs.py) |
-| Cost matches hand-computed values (cached + long-context) | [tests/test_logs_cost_flaky.py](tests/test_logs_cost_flaky.py) |
-| Report schema locked | `test_report_json_and_html_golden` |
+| Estimators equal exact enumeration, are unbiased for p^k, and **match Inspect's `pass_k`/`pass_at` reducers on real Inspect logs** | `tests/test_metrics_stats.py`, `tests/test_inspect_integration.py` |
+| `.eval` (zstd) and `.json` logs parse; unknown fields are reported, never dropped | `tests/test_logs_cost.py` (logs generated by real Inspect via [examples/make_inspect_logs.py](examples/make_inspect_logs.py)) |
+| Interval coverage and test calibration, **including a defect I found and fixed** (plug-in bootstrap covered pass^5 only 81%) | [docs/coverage.md](docs/coverage.md), `scripts/coverage_sim.py` |
+| Gate detects an injected regression, passes noise, power ~95%, type-I error 0% in simulation (conservative) | `tests/test_compare_gate.py`, [docs/coverage.md](docs/coverage.md) |
+| Record/replay reproduces a run bit-for-bit with no model; 16 calls = 16 cassettes (epochs not collapsed) | `tests/test_inspect_integration.py` |
+| Imported OpenAI eval runs in Inspect and scores | `tests/test_importer.py` |
+| Cost matches hand computation incl. cached + long-context tiers | `tests/test_logs_cost.py` |
 
-## Limitations
-- Sample logs are **synthetic** (Inspect schema); a live Inspect run was not possible in the build sandbox. Reader built against the observed Inspect 0.3.287 sample keys ([docs/inspect-logs.md](docs/inspect-logs.md)).
-- The bundled price snapshot is **illustrative**, not authoritative. Replace before publishing cost numbers.
-- The OpenAI export layout is reconstructed from public API shapes ([docs/importer.md](docs/importer.md)).
-- OTLP export is optional and untested against a live collector; OpenTelemetry GenAI conventions are still in Development.
-- `collect.yml` is untested live (requires your repo secrets).
-
-## Configuration
-Copy `.env.example` to `.env` (git-ignored). Passk itself needs no keys; they are only for the scheduled collector (store as repository secrets).
+## Limitations (plain words)
+- Evaluated on **mock-model logs** produced by real Inspect (`mockllm`): they validate parsing and statistics, not any real model's behaviour. No real-model benchmark is published here.
+- Intervals are conservative (over-cover, ~97-99%) for k >= 2; power is not tuned.
+- Success = every scorer correct; partial credit is not modelled. Errored samples count as failures.
+- Shadow cost for free-tier models is a list-price estimate; long-context tier is applied per sample total.
+- OpenAI Evals export layouts are reconstructed from public API shapes ([docs/importer.md](docs/importer.md)).
+- `PASSK_REPORT` must be set **before** Inspect starts (hooks are enabled at registration).
+- Competitors exist for CI gating ([teardown](docs/landscape.md)); the differentiator is the metric, the measured calibration and the Inspect-native tooling.
 
 ## What I would do differently
-Run a real Inspect eval to validate the reader end-to-end, and ship a price-snapshot updater.
+Run the real-model benchmark first, with the cassettes committed, before building more estimators.
+
+## Configuration
+Copy `.env.example` to `.env` (git-ignored). Passk needs no keys; provider keys are only for live Inspect runs.
 
 ## AI assistance
-Written with Claude Code; every claim above is backed by a test in this repo.
+Written with Claude Code. Every claim above links to a test or a script.
 
-MIT licensed. See [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md), [CHANGELOG.md](CHANGELOG.md).
+MIT. See [CONTRIBUTING](CONTRIBUTING.md), [SECURITY](SECURITY.md), [CHANGELOG](CHANGELOG.md).

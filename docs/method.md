@@ -1,17 +1,8 @@
-# Method notes
-- **pass^k** = C(c,k)/C(n,k): chance that k trials drawn without replacement from the n recorded
-  trials all succeed. Exact; verified against brute-force enumeration (`tests/test_metrics.py`).
-- **pass@k** = 1 - C(n-c,k)/C(n,k) (Chen et al. 2021).
-- Per-task rates get Wilson intervals; overall metrics are means over tasks (tasks with n<k are
-  excluded and counted) with a percentile bootstrap **over tasks**. Trials within a task are not
-  independent of the task, so bootstrapping trials would understate uncertainty.
-- Errored samples count as failures.
-- **compare** pairs by task id, bootstraps the mean difference in pass^k, and refuses to call
-  a verdict if either side has fewer than `--min-trials` (default 5) trials per task.
-- **Cost** is *shadow cost*: tokens x list price from a dated snapshot. Free-tier spend is $0.
-  The bundled snapshot is ILLUSTRATIVE; replace it with a dated LiteLLM cost-map snapshot.
-  Long-context tier is applied per sample total (approximation).
-# Limits
-- Success = all scorers correct; partial credit is not modelled.
-- Interval coverage is checked by seeded simulation, not proven for small task counts.
-- Sample logs in `examples/logs` are synthetic (`examples/make_sample_logs.py`).
+# Method
+- **pass^k** = C(c,k)/C(n,k): P(k trials drawn without replacement from n recorded trials all succeed); unbiased for p^k (property-tested). **pass@k** = 1 - C(n-c,k)/C(n,k).
+- **Unit of analysis is the task.** Headline = mean over tasks. Tasks with n < k are excluded and counted.
+- **Interval**: two-stage bootstrap. Resample tasks; for each drawn task draw p ~ Beta(c+1/2, n-c+1/2) (Jeffreys) then n new Bernoulli trials; recompute. Plug-in p = c/n was tried first and undercovers at high k because tasks at 0/n or n/n contribute no within-task variance ([coverage.md](coverage.md)).
+- **Bayes**: per task p ~ Beta(1/2+c, 1/2+n-c); E[p^k] closed form via gamma functions; defined for k > n.
+- **Paired comparison**: per-task difference of pass^k; CI by paired two-stage bootstrap; p by exact sign-flip randomisation (<= 16 nonzero pairs, else Monte Carlo); verdict requires both; Holm across several k; MDE = (z_{1-a/2} + z_power) * sd / sqrt(tasks).
+- **Gate modes**: `point` (drop > margin), `significant` (regressed AND drop > margin), `noninferior` (fail unless the lower CI bound is above -margin; needs enough data, exit 2 with `--strict` otherwise).
+- **Cost**: shadow cost = tokens x list price from a dated snapshot; model names are resolved exact -> alias -> prefix-stripped -> median across providers, and the route is recorded.

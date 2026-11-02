@@ -1,14 +1,14 @@
-"""Importer for exported OpenAI Evals (adapter module for that format).
+"""Importer for OpenAI Evals into runnable Inspect tasks (adapter module for those formats).
 
-Expected export layout (documented in docs/importer.md; reconstructed from the public Evals
-API object shapes, not from a vendor-published file spec):
+Two sources are understood:
+  * Evals API export  : EXPORT/eval.json {name, testing_criteria[...]} + EXPORT/data.jsonl
+                        ({"item": {"input", "ideal"|"expected"|...}} per line).
+  * openai/evals repo : EXPORT/samples.jsonl ({"input": [...messages], "ideal": str|[str]}) plus
+                        optional EXPORT/eval.yaml registry entry (class: ...Match/Includes/FuzzyMatch).
 
-  EXPORT_DIR/eval.json    {"name", "data_source_config", "testing_criteria": [ ... ]}
-  EXPORT_DIR/data.jsonl   one item per line: {"item": {"input": ..., "ideal"|"expected": ...}}
-                          (bare {"input","ideal"} lines are accepted too)
-
-Output: Inspect `dataset.jsonl` + `task.py` + `import_report.md` listing everything that was
-not converted. Unconvertible graders are never silently dropped.
+Output: dataset.jsonl, task.py (a real Inspect task using scorers in `passk.scorers`) and
+import_report.md. EVERY grader or field that is not converted, or converted approximately, is
+listed; nothing is dropped silently. `tests/test_importer.py` runs the generated task in Inspect.
 """
 
 from __future__ import annotations
@@ -18,7 +18,12 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-SCORER_FOR_STRING_CHECK = {"eq": "exact()", "ne": None, "like": "includes()", "ilike": "includes(ignore_case=True)"}
+
+# string_check operation -> (scorer expression, exact?)
+STRING_OPS = {"eq": ("exact()", True), "like": ("includes()", True),
+              "ilike": ("includes(ignore_case=True)", True)}
+LEGACY_CLASSES = {"match": ("match()", True), "includes": ("includes()", True),
+                  "fuzzy_match": ("fuzzy_match()", False), "exact": ("exact()", True)}
 
 
 @dataclass
@@ -26,30 +31,21 @@ class ImportResult:
     items: int = 0
     scorers: list[str] = field(default_factory=list)
     not_converted: list[str] = field(default_factory=list)
+    approximate: list[str] = field(default_factory=list)
 
 
 def _input_text(inp: Any) -> str:
     if isinstance(inp, str):
         return inp
     if isinstance(inp, list):
-        parts = []
-        for m in inp:
-            if isinstance(m, dict):
-                parts.append(str(m.get("content", "")))
-            else:
-                parts.append(str(m))
-        return "\n".join(parts)
+        return "\n".join(str(m.get("content", "")) if isinstance(m, dict) else str(m) for m in inp)
     return json.dumps(inp, sort_keys=True)
 
 
-def import_openai(export_dir: str | Path, out_dir: str | Path) -> ImportResult:
-    export, out = Path(export_dir), Path(out_dir)
-    cfg = json.loads((export / "eval.json").read_text())
-    res = ImportResult()
-    out.mkdir(parents=True, exist_ok=True)
-
-    lines = []
-    for i, line in enumerate((export / "data.jsonl").read_text().splitlines()):
+def _load_items(export: Path, res: ImportResult) -> list[dict[str, str]]:
+    path = export / "data.jsonl" if (export / "data.jsonl").exists() else export / "samples.jsonl"
+    items = []
+    for i, line in enumerate(path.read_text().splitlines()):
         if not line.strip():
             continue
         rec = json.loads(line)
@@ -59,54 +55,85 @@ def import_openai(export_dir: str | Path, out_dir: str | Path) -> ImportResult:
             res.not_converted.append(f"item {i}: no ideal/expected/target field; skipped")
             continue
         if isinstance(target, list):
+            if len(target) > 1:
+                res.approximate.append(f"item {i}: {len(target)} acceptable answers; only the first is the target")
             target = target[0] if target else ""
         extra = sorted(set(item) - {"input", "ideal", "expected", "target"})
         if extra:
             res.not_converted.append(f"item {i}: fields not carried over: {extra}")
-        lines.append({"id": f"item-{i}", "input": _input_text(item.get("input")),
-                      "target": str(target)})
-    (out / "dataset.jsonl").write_text("".join(json.dumps(x) + "\n" for x in lines))
-    res.items = len(lines)
+        items.append({"id": f"item-{i}", "input": _input_text(item.get("input")), "target": str(target)})
+    return items
 
-    for crit in cfg.get("testing_criteria", []):
-        ctype, name = crit.get("type"), crit.get("name", crit.get("type"))
-        if ctype == "string_check":
-            op = crit.get("operation", "eq")
-            scorer = SCORER_FOR_STRING_CHECK.get(op)
-            if scorer:
-                res.scorers.append(scorer)
+
+def import_openai(export_dir: str | Path, out_dir: str | Path) -> ImportResult:
+    export, out = Path(export_dir), Path(out_dir)
+    res = ImportResult()
+    out.mkdir(parents=True, exist_ok=True)
+    name = export.name
+    if (export / "eval.json").exists():
+        cfg = json.loads((export / "eval.json").read_text())
+        name = cfg.get("name", name)
+        for crit in cfg.get("testing_criteria", []):
+            ctype, cname = crit.get("type"), crit.get("name", crit.get("type"))
+            if ctype == "string_check":
+                scorer = STRING_OPS.get(crit.get("operation", "eq"))
+                if scorer:
+                    res.scorers.append(scorer[0])
+                else:
+                    res.not_converted.append(f"grader {cname!r}: string_check operation {crit.get('operation')!r}")
+                ref = str(crit.get("reference", ""))
+                if ref and ref not in ("{{item.ideal}}", "{{item.expected}}"):
+                    res.not_converted.append(f"grader {cname!r}: custom reference template {ref!r} replaced by dataset target")
+            elif ctype == "text_similarity":
+                res.scorers.append(f"fuzzy_match(threshold={float(crit.get('pass_threshold', 0.8))})")
+                res.approximate.append(
+                    f"grader {cname!r}: text_similarity metric {crit.get('evaluation_metric')!r} "
+                    "approximated by difflib ratio (passk.scorers.fuzzy_match)")
+            elif ctype == "label_model":
+                res.scorers.append("model_graded_qa()")
+                res.approximate.append(
+                    f"grader {cname!r}: label_model mapped to Inspect model_graded_qa(); labels "
+                    f"{crit.get('labels')} and passing_labels {crit.get('passing_labels')} are NOT carried over; "
+                    "needs a grader model at run time")
             else:
-                res.not_converted.append(f"grader {name!r}: string_check operation {op!r}")
-            tmpl = str(crit.get("reference", ""))
-            if tmpl and tmpl != "{{item.ideal}}" and tmpl != "{{item.expected}}":
-                res.not_converted.append(
-                    f"grader {name!r}: custom reference template {tmpl!r} replaced by dataset target"
-                )
-        else:
-            res.not_converted.append(f"grader {name!r}: type {ctype!r} has no automatic mapping")
+                res.not_converted.append(f"grader {cname!r}: type {ctype!r} has no automatic mapping")
+    elif (export / "eval.yaml").exists():
+        try:
+            import yaml
+        except ImportError as e:
+            raise RuntimeError("legacy openai/evals registry import needs PyYAML: pip install pyyaml") from e
+        reg = yaml.safe_load((export / "eval.yaml").read_text()) or {}
+        for key, val in reg.items():
+            cls = str(val["class"]).split(":")[0].rsplit(".", 1)[-1].lower() \
+                if isinstance(val, dict) and "class" in val else ""
+            if cls in LEGACY_CLASSES:
+                expr, exact = LEGACY_CLASSES[cls]
+                res.scorers.append(expr)
+                if not exact:
+                    res.approximate.append(f"registry {key!r}: {cls} approximated by difflib ratio")
+            elif cls:
+                res.not_converted.append(f"registry {key!r}: eval class {cls!r} has no automatic mapping")
+    items = _load_items(export, res)
+    (out / "dataset.jsonl").write_text("".join(json.dumps(x) + "\n" for x in items))
+    res.items = len(items)
     if not res.scorers:
         res.scorers.append("exact()")
         res.not_converted.append("no convertible grader found; defaulted to exact()")
-
-    task = (
-        "from inspect_ai import Task, task\n"
-        "from inspect_ai.dataset import json_dataset\n"
-        "from inspect_ai.scorer import exact, includes\n"
-        "from inspect_ai.solver import generate\n\n\n"
-        "@task\n"
-        "def imported():\n"
-        "    return Task(\n"
-        "        dataset=json_dataset(__file__.replace('task.py', 'dataset.jsonl')),\n"
-        "        solver=generate(),\n"
-        f"        scorer=[{', '.join(res.scorers)}],\n"
-        "    )\n"
-    )
+    uses_passk = any(s.startswith("fuzzy_match") for s in res.scorers)
+    imports = ["from inspect_ai import Task, task", "from inspect_ai.dataset import json_dataset",
+               "from inspect_ai.scorer import exact, includes, match, model_graded_qa",
+               "from inspect_ai.solver import generate"]
+    if uses_passk:
+        imports.append("from passk.scorers import fuzzy_match")
+    task = ("\n".join(imports) + "\n\nfrom pathlib import Path\n\n\n@task\ndef imported():\n"
+            "    return Task(\n"
+            "        dataset=json_dataset(str(Path(__file__).with_name('dataset.jsonl'))),\n"
+            "        solver=generate(),\n"
+            f"        scorer=[{', '.join(res.scorers)}],\n    )\n")
     (out / "task.py").write_text(task)
-
-    report = [f"# Import report: {cfg.get('name', 'eval')}", "",
-              f"- Items converted: {res.items}",
-              f"- Scorers emitted: {', '.join(res.scorers)}", "",
-              "## Not converted", ""]
-    report += [f"- {x}" for x in res.not_converted] or ["- (nothing)"]
-    (out / "import_report.md").write_text("\n".join(report) + "\n")
+    rep = [f"# Import report: {name}", "", f"- Items converted: {res.items}",
+           f"- Scorers emitted: {', '.join(res.scorers)}", "", "## Converted approximately", ""]
+    rep += [f"- {x}" for x in res.approximate] or ["- (nothing)"]
+    rep += ["", "## Not converted", ""] + ([f"- {x}" for x in res.not_converted] or ["- (nothing)"])
+    (out / "import_report.md").write_text("\n".join(rep) + "\n")
     return res
