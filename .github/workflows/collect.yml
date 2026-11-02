@@ -1,27 +1,70 @@
 name: collect
-# Live trials within free-tier limits. Secrets: NVIDIA_API_KEY. Never runs on pull requests.
+# Live trials against the NVIDIA-hosted API within free-tier limits. Secret: NVIDIA_API_KEY.
+# Manual until a model id is confirmed with the `smoke` workflow; then uncomment the schedule.
+# Never runs on pull requests. Logs are saved as an artifact; opening a PR is optional (see the last step).
 on:
-  schedule: [{ cron: "17 3 * * *" }]
+  # schedule: [{ cron: "17 3 * * *" }]
   workflow_dispatch:
+    inputs:
+      model:
+        description: "Model id exactly as listed in the smoke report (without the provider prefix)"
+        required: true
+        default: "openai/gpt-oss-120b"
+      epochs:
+        description: "Trials per task"
+        required: true
+        default: "5"
 jobs:
   collect:
     runs-on: ubuntu-latest
-    permissions: { contents: write, pull-requests: write }
+    permissions:
+      contents: write
+      pull-requests: write
     env:
       NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
-      PASSK_RPM: "15"
+      MODEL: ${{ inputs.model || 'openai/gpt-oss-120b' }}
+      EPOCHS: ${{ inputs.epochs || '5' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: { python-version: "3.12" }
-      - run: pip install -e . inspect-ai openai
-      - name: Skip cleanly without a key
-        run: test -n "$NVIDIA_API_KEY" || { echo "NVIDIA_API_KEY not set; skipping"; exit 0; }
-      - run: |
-          test -z "$NVIDIA_API_KEY" && exit 0
-          inspect eval examples/tiny_task.py --model openai/openai/gpt-oss-120b \
+        with:
+          python-version: "3.12"
+      - run: pip install -e . inspect-ai openai zstandard
+      - name: Require a key
+        run: test -n "$NVIDIA_API_KEY" || { echo "::error::NVIDIA_API_KEY is not set"; exit 1; }
+      - name: Run the eval (5 tasks x EPOCHS trials, one connection)
+        run: |
+          inspect eval examples/tiny_task.py --model "openai/$MODEL" \
             --model-base-url https://integrate.api.nvidia.com/v1 \
-            -M api_key=$NVIDIA_API_KEY --epochs 5 --max-connections 1 \
+            -M api_key="$NVIDIA_API_KEY" --epochs "$EPOCHS" --max-connections 1 \
             --log-dir collected --log-format json
+      - name: Fail unless every sample completed
+        run: |
+          python - <<'PY'
+          import glob, json, sys
+          files = glob.glob("collected/*.json")
+          if not files:
+              sys.exit("no log written")
+          d = json.load(open(files[0]))
+          n = len(d.get("samples") or [])
+          bad = [s["id"] for s in d.get("samples", []) if s.get("error")]
+          print("status:", d["status"], "samples:", n, "errored:", len(bad))
+          if d["status"] != "success" or n == 0 or bad:
+              sys.exit("eval did not complete cleanly; refusing to keep these logs")
+          PY
+      - name: Passk report
+        run: passk report collected --out report --alias "openai/$MODEL=$MODEL"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: collected-${{ github.run_id }}
+          path: |
+            collected
+            report
+      # Optional: open a pull request with the logs. Needs Settings -> Actions -> General ->
+      # "Allow GitHub Actions to create and approve pull requests", then set the repository variable COLLECT_OPEN_PR=true.
       - uses: peter-evans/create-pull-request@v6
-        with: { branch: collect/nightly, title: "chore: nightly collected logs" }
+        if: ${{ vars.COLLECT_OPEN_PR == 'true' }}
+        with:
+          branch: collect/nightly
+          title: "chore: collected logs"
+          add-paths: collected

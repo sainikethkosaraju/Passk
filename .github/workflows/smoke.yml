@@ -1,0 +1,20 @@
+name: smoke
+# Blueprint T0.2: find out which NVIDIA-hosted models this key can actually call, before collecting anything.
+# Manual only. Makes at most ~9 tiny requests. The key is never printed (GitHub also masks it).
+on: { workflow_dispatch: {} }
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    env:
+      NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python scripts/nvidia_smoke.py --out smoke-report.md --max 8
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: nvidia-smoke-report
+          path: smoke-report.md
