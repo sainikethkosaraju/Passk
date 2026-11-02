@@ -18,7 +18,6 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-
 # string_check operation -> (scorer expression, exact?)
 STRING_OPS = {"eq": ("exact()", True), "like": ("includes()", True),
               "ilike": ("includes(ignore_case=True)", True)}
