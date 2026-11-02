@@ -1,0 +1,1060 @@
+{
+ "version": 2,
+ "status": "success",
+ "eval": {
+  "task": "tiny",
+  "model": "gpt-oss-120b"
+ },
+ "samples": [
+  {
+   "id": "task-0",
+   "epoch": 1,
+   "input": "q",
+   "target": "a",
+   "scores": {
+    "match": {
+     "value": "I"
+    }
+   },
+   "model_usage": {
+    "gpt-oss-120b": {
+     "input_tokens": 1000,
+     "output_tokens": 200,
+     "input_tokens_cache_read": 400,
+     "total_tokens": 1200
+    }
+   },
+   "total_time": 4.843,
+   "error": null
+  },
+  {
+   "id": "task-0",
+   "epoch": 2,
+   "input": "q",
+   "target": "a",
+   "scores": {
+    "match": {
+     "value": "C"
+    }
+   },
+   "model_usage": {
+    "gpt-oss-120b": {
+     "input_tokens": 1000,
+     "output_tokens": 200,
+     "input_tokens_cache_read": 400,
+     "total_tokens": 1200
+    }
+   },
+   "total_time": 2.255,
+   "error": null
+  },
+  {
+   "id": "task-0",
+   "epoch": 3,
+   "input": "q",
+   "target": "a",
+   "scores": {
+    "match": {
+     "value": "I"
+    }
+   },
+   "model_usage": {
+    "gpt-oss-120b": {
+     "input_tokens": 1000,
+     "output_tokens": 200,
+     "input_tokens_cache_read": 400,
+     "total_tokens": 1200
+    }
+   },
+   "total_time": 4.208,
+   "error": null
+  },
+  {
+   "id": "task-0",
+   "epoch": 4,
+   "input": "q",
+   "target": "a",
+   "scores": {
+    "match": {
+     "value": "I"
+    }
+   },
+   "model_usage": {
+    "gpt-oss-120b": {
+     "input_tokens": 1000,
+     "output_tokens": 200,
+     "input_tokens_cache_read": 400,
+     "total_tokens": 1200
+    }
+   },
+   "total_time": 2.924,
+   "error": null
+  },
+  {
+   "id": "task-0",
+   "epoch": 5,
+   "input": "q",
+   "target": "a",
+   "scores": {
+    "match": {
+     "value": "I"
+    }
+   },
+   "model_usage": {
+    "gpt-oss-120b": {
+     "input_tokens": 1000,
+     "output_tokens": 200,
+     "input_tokens_cache_read": 400,
+     "total_tokens": 1200
+    }
+   },
+   "total_time": 3.82,
+   "error": null
+  },
+  {
+   "id": "task-1",
+   "epoch": 1,
+   "input": "q",
+   "target": "a",
+   "scores": {
+    "match": {
+     "value": "C"
+    }
+   },
+   "model_usage": {
+    "gpt-oss-120b": {
+     "input_tokens": 1050,
+     "output_tokens": 200,
+     "input_tokens_cache_read": 400,
+     "total_tokens": 1200
+    }
+   },
+   "total_time": 2.475,
+   "error": null
+  },
+  {
+   "id": "task-1",
+   "epoch": 2,
+   "input": "q",
+   "target": "a",
+   "scores": {
+    "match": {
+     "value": "C"
+    }
+   },
+   "model_usage": {
+    "gpt-oss-120b": {
+     "input_tokens": 1050,
+     "output_tokens": 200,
+     "input_tokens_cache_read": 400,
+     "total_tokens": 1200
+    }
+   },
+   "total_time": 3.181,
+   "error": null
+  },
+  {
+   "id": "task-1",
+   "epoch": 3,
+   "input": "q",
+   "target": "a",
+   "scores": {
+    "match": {
+     "value": "I"
+    }
+   },
+   "model_usage": {
+    "gpt-oss-120b": {
+     "input_tokens": 1050,
+     "output_tokens": 200,
+     "input_tokens_cache_read": 400,
+     "total_tokens": 1200
+    }
+   },
+   "total_time": 4.984,
+   "error": null
+  },
+  {
+   "id": "task-1",
+   "epoch": 4,
+   "input": "q",
+   "target": "a",
+   "scores": {
+    "match": {
+     "value": "I"
+    }
+   },
+   "model_usage": {
+    "gpt-oss-120b": {
+     "input_tokens": 1050,
+     "output_tokens": 200,
+     "input_tokens_cache_read": 400,
+     "total_tokens": 1200
+    }
+   },
+   "total_time": 3.633,
+   "error": null
+  },
+  {
+   "id": "task-1",
+   "epoch": 5,
+   "input": "q",
+   "target": "a",
+   "scores": {
+    "match": {
+     "value": "C"
+    }
+   },
+   "model_usage": {
+    "gpt-oss-120b": {
+     "input_tokens": 1050,
+     "output_tokens": 200,
+     "input_tokens_cache_read": 400,
+     "total_tokens": 1200
+    }
+   },
+   "total_time": 2.805,
+   "error": null
+  },
+  {
+   "id": "task-2",
+   "epoch": 1,
+   "input": "q",
+   "target": "a",
+   "scores": {
+    "match": {
+     "value": "C"
+    }
+   },
+   "model_usage": {
+    "gpt-oss-120b": {
+     "input_tokens": 1100,
+     "output_tokens": 200,
+     "input_tokens_cache_read": 400,
+     "total_tokens": 1200
+    }
+   },
+   "total_time": 2.082,
+   "error": null
+  },
+  {
+   "id": "task-2",
+   "epoch": 2,
+   "input": "q",
+   "target": "a",
+   "scores": {
+    "match": {
+     "value": "C"
+    }
+   },
+   "model_usage": {
+    "gpt-oss-120b": {
+     "input_tokens": 1100,
+     "output_tokens": 200,
+     "input_tokens_cache_read": 400,
+     "total_tokens": 1200
+    }
+   },
+   "total_time": 2.955,
+   "error": null
+  },
+  {
+   "id": "task-2",
+   "epoch": 3,
+   "input": "q",
+   "target": "a",
+   "scores": {
+    "match": {
+     "value": "C"
+    }
+   },
+   "model_usage": {
+    "gpt-oss-120b": {
+     "input_tokens": 1100,
+     "output_tokens": 200,
+     "input_tokens_cache_read": 400,
+     "total_tokens": 1200
+    }
+   },
+   "total_time": 4.675,
+   "error": null
+  },
+  {
+   "id": "task-2",
+   "epoch": 4,
+   "input": "q",
+   "target": "a",
+   "scores": {
+    "match": {
+     "value": "I"
+    }
+   },
+   "model_usage": {
+    "gpt-oss-120b": {
+     "input_tokens": 1100,
+     "output_tokens": 200,
+     "input_tokens_cache_read": 400,
+     "total_tokens": 1200
+    }
+   },
+   "total_time": 3.682,
+   "error": null
+  },
+  {
+   "id": "task-2",
+   "epoch": 5,
+   "input": "q",
+   "target": "a",
+   "scores": {
+    "match": {
+     "value": "C"
+    }
+   },
+   "model_usage": {
+    "gpt-oss-120b": {
+     "input_tokens": 1100,
+     "output_tokens": 200,
+     "input_tokens_cache_read": 400,
+     "total_tokens": 1200
+    }
+   },
+   "total_time": 2.072,
+   "error": null
+  },
+  {
+   "id": "task-3",
+   "epoch": 1,
+   "input": "q",
+   "target": "a",
+   "scores": {
+    "match": {
+     "value": "C"
+    }
+   },
+   "model_usage": {
+    "gpt-oss-120b": {
+     "input_tokens": 1150,
+     "output_tokens": 200,
+     "input_tokens_cache_read": 400,
+     "total_tokens": 1200
+    }
+   },
+   "total_time": 2.41,
+   "error": null
+  },
+  {
+   "id": "task-3",
+   "epoch": 2,
+   "input": "q",
+   "target": "a",
+   "scores": {
+    "match": {
+     "value": "I"
+    }
+   },
+   "model_usage": {
+    "gpt-oss-120b": {
+     "input_tokens": 1150,
+     "output_tokens": 200,
+     "input_tokens_cache_read": 400,
+     "total_tokens": 1200
+    }
+   },
+   "total_time": 4.996,
+   "error": null
+  },
+  {
+   "id": "task-3",
+   "epoch": 3,
+   "input": "q",
+   "target": "a",
+   "scores": {
+    "match": {
+     "value": "I"
+    }
+   },
+   "model_usage": {
+    "gpt-oss-120b": {
+     "input_tokens": 1150,
+     "output_tokens": 200,
+     "input_tokens_cache_read": 400,
+     "total_tokens": 1200
+    }
+   },
+   "total_time": 2.546,
+   "error": null
+  },
+  {
+   "id": "task-3",
+   "epoch": 4,
+   "input": "q",
+   "target": "a",
+   "scores": {
+    "match": {
+     "value": "I"
+    }
+   },
+   "model_usage": {
+    "gpt-oss-120b": {
+     "input_tokens": 1150,
+     "output_tokens": 200,
+     "input_tokens_cache_read": 400,
+     "total_tokens": 1200
+    }
+   },
+   "total_time": 4.39,
+   "error": null
+  },
+  {
+   "id": "task-3",
+   "epoch": 5,
+   "input": "q",
+   "target": "a",
+   "scores": {
+    "match": {
+     "value": "I"
+    }
+   },
+   "model_usage": {
+    "gpt-oss-120b": {
+     "input_tokens": 1150,
+     "output_tokens": 200,
+     "input_tokens_cache_read": 400,
+     "total_tokens": 1200
+    }
+   },
+   "total_time": 4.72,
+   "error": null
+  },
+  {
+   "id": "task-4",
+   "epoch": 1,
+   "input": "q",
+   "target": "a",
+   "scores": {
+    "match": {
+     "value": "I"
+    }
+   },
+   "model_usage": {
+    "gpt-oss-120b": {
+     "input_tokens": 1200,
+     "output_tokens": 200,
+     "input_tokens_cache_read": 400,
+     "total_tokens": 1200
+    }
+   },
+   "total_time": 4.369,
+   "error": null
+  },
+  {
+   "id": "task-4",
+   "epoch": 2,
+   "input": "q",
+   "target": "a",
+   "scores": {
+    "match": {
+     "value": "C"
+    }
+   },
+   "model_usage": {
+    "gpt-oss-120b": {
+     "input_tokens": 1200,
+     "output_tokens": 200,
+     "input_tokens_cache_read": 400,
+     "total_tokens": 1200
+    }
+   },
+   "total_time": 4.943,
+   "error": null
+  },
+  {
+   "id": "task-4",
+   "epoch": 3,
+   "input": "q",
+   "target": "a",
+   "scores": {
+    "match": {
+     "value": "I"
+    }
+   },
+   "model_usage": {
+    "gpt-oss-120b": {
+     "input_tokens": 1200,
+     "output_tokens": 200,
+     "input_tokens_cache_read": 400,
+     "total_tokens": 1200
+    }
+   },
+   "total_time": 2.484,
+   "error": null
+  },
+  {
+   "id": "task-4",
+   "epoch": 4,
+   "input": "q",
+   "target": "a",
+   "scores": {
+    "match": {
+     "value": "I"
+    }
+   },
+   "model_usage": {
+    "gpt-oss-120b": {
+     "input_tokens": 1200,
+     "output_tokens": 200,
+     "input_tokens_cache_read": 400,
+     "total_tokens": 1200
+    }
+   },
+   "total_time": 4.145,
+   "error": null
+  },
+  {
+   "id": "task-4",
+   "epoch": 5,
+   "input": "q",
+   "target": "a",
+   "scores": {
+    "match": {
+     "value": "I"
+    }
+   },
+   "model_usage": {
+    "gpt-oss-120b": {
+     "input_tokens": 1200,
+     "output_tokens": 200,
+     "input_tokens_cache_read": 400,
+     "total_tokens": 1200
+    }
+   },
+   "total_time": 3.591,
+   "error": null
+  },
+  {
+   "id": "task-5",
+   "epoch": 1,
+   "input": "q",
+   "target": "a",
+   "scores": {
+    "match": {
+     "value": "I"
+    }
+   },
+   "model_usage": {
+    "gpt-oss-120b": {
+     "input_tokens": 1250,
+     "output_tokens": 200,
+     "input_tokens_cache_read": 400,
+     "total_tokens": 1200
+    }
+   },
+   "total_time": 4.774,
+   "error": null
+  },
+  {
+   "id": "task-5",
+   "epoch": 2,
+   "input": "q",
+   "target": "a",
+   "scores": {
+    "match": {
+     "value": "I"
+    }
+   },
+   "model_usage": {
+    "gpt-oss-120b": {
+     "input_tokens": 1250,
+     "output_tokens": 200,
+     "input_tokens_cache_read": 400,
+     "total_tokens": 1200
+    }
+   },
+   "total_time": 4.495,
+   "error": null
+  },
+  {
+   "id": "task-5",
+   "epoch": 3,
+   "input": "q",
+   "target": "a",
+   "scores": {
+    "match": {
+     "value": "I"
+    }
+   },
+   "model_usage": {
+    "gpt-oss-120b": {
+     "input_tokens": 1250,
+     "output_tokens": 200,
+     "input_tokens_cache_read": 400,
+     "total_tokens": 1200
+    }
+   },
+   "total_time": 4.649,
+   "error": null
+  },
+  {
+   "id": "task-5",
+   "epoch": 4,
+   "input": "q",
+   "target": "a",
+   "scores": {
+    "match": {
+     "value": "I"
+    }
+   },
+   "model_usage": {
+    "gpt-oss-120b": {
+     "input_tokens": 1250,
+     "output_tokens": 200,
+     "input_tokens_cache_read": 400,
+     "total_tokens": 1200
+    }
+   },
+   "total_time": 3.383,
+   "error": null
+  },
+  {
+   "id": "task-5",
+   "epoch": 5,
+   "input": "q",
+   "target": "a",
+   "scores": {
+    "match": {
+     "value": "I"
+    }
+   },
+   "model_usage": {
+    "gpt-oss-120b": {
+     "input_tokens": 1250,
+     "output_tokens": 200,
+     "input_tokens_cache_read": 400,
+     "total_tokens": 1200
+    }
+   },
+   "total_time": 4.761,
+   "error": null
+  },
+  {
+   "id": "task-6",
+   "epoch": 1,
+   "input": "q",
+   "target": "a",
+   "scores": {
+    "match": {
+     "value": "I"
+    }
+   },
+   "model_usage": {
+    "gpt-oss-120b": {
+     "input_tokens": 1300,
+     "output_tokens": 200,
+     "input_tokens_cache_read": 400,
+     "total_tokens": 1200
+    }
+   },
+   "total_time": 3.46,
+   "error": null
+  },
+  {
+   "id": "task-6",
+   "epoch": 2,
+   "input": "q",
+   "target": "a",
+   "scores": {
+    "match": {
+     "value": "I"
+    }
+   },
+   "model_usage": {
+    "gpt-oss-120b": {
+     "input_tokens": 1300,
+     "output_tokens": 200,
+     "input_tokens_cache_read": 400,
+     "total_tokens": 1200
+    }
+   },
+   "total_time": 2.974,
+   "error": null
+  },
+  {
+   "id": "task-6",
+   "epoch": 3,
+   "input": "q",
+   "target": "a",
+   "scores": {
+    "match": {
+     "value": "I"
+    }
+   },
+   "model_usage": {
+    "gpt-oss-120b": {
+     "input_tokens": 1300,
+     "output_tokens": 200,
+     "input_tokens_cache_read": 400,
+     "total_tokens": 1200
+    }
+   },
+   "total_time": 2.498,
+   "error": null
+  },
+  {
+   "id": "task-6",
+   "epoch": 4,
+   "input": "q",
+   "target": "a",
+   "scores": {
+    "match": {
+     "value": "I"
+    }
+   },
+   "model_usage": {
+    "gpt-oss-120b": {
+     "input_tokens": 1300,
+     "output_tokens": 200,
+     "input_tokens_cache_read": 400,
+     "total_tokens": 1200
+    }
+   },
+   "total_time": 2.804,
+   "error": null
+  },
+  {
+   "id": "task-6",
+   "epoch": 5,
+   "input": "q",
+   "target": "a",
+   "scores": {
+    "match": {
+     "value": "I"
+    }
+   },
+   "model_usage": {
+    "gpt-oss-120b": {
+     "input_tokens": 1300,
+     "output_tokens": 200,
+     "input_tokens_cache_read": 400,
+     "total_tokens": 1200
+    }
+   },
+   "total_time": 2.929,
+   "error": null
+  },
+  {
+   "id": "task-7",
+   "epoch": 1,
+   "input": "q",
+   "target": "a",
+   "scores": {
+    "match": {
+     "value": "I"
+    }
+   },
+   "model_usage": {
+    "gpt-oss-120b": {
+     "input_tokens": 1350,
+     "output_tokens": 200,
+     "input_tokens_cache_read": 400,
+     "total_tokens": 1200
+    }
+   },
+   "total_time": 4.119,
+   "error": null
+  },
+  {
+   "id": "task-7",
+   "epoch": 2,
+   "input": "q",
+   "target": "a",
+   "scores": {
+    "match": {
+     "value": "I"
+    }
+   },
+   "model_usage": {
+    "gpt-oss-120b": {
+     "input_tokens": 1350,
+     "output_tokens": 200,
+     "input_tokens_cache_read": 400,
+     "total_tokens": 1200
+    }
+   },
+   "total_time": 3.553,
+   "error": null
+  },
+  {
+   "id": "task-7",
+   "epoch": 3,
+   "input": "q",
+   "target": "a",
+   "scores": {
+    "match": {
+     "value": "I"
+    }
+   },
+   "model_usage": {
+    "gpt-oss-120b": {
+     "input_tokens": 1350,
+     "output_tokens": 200,
+     "input_tokens_cache_read": 400,
+     "total_tokens": 1200
+    }
+   },
+   "total_time": 3.764,
+   "error": null
+  },
+  {
+   "id": "task-7",
+   "epoch": 4,
+   "input": "q",
+   "target": "a",
+   "scores": {
+    "match": {
+     "value": "I"
+    }
+   },
+   "model_usage": {
+    "gpt-oss-120b": {
+     "input_tokens": 1350,
+     "output_tokens": 200,
+     "input_tokens_cache_read": 400,
+     "total_tokens": 1200
+    }
+   },
+   "total_time": 2.623,
+   "error": null
+  },
+  {
+   "id": "task-7",
+   "epoch": 5,
+   "input": "q",
+   "target": "a",
+   "scores": {
+    "match": {
+     "value": "I"
+    }
+   },
+   "model_usage": {
+    "gpt-oss-120b": {
+     "input_tokens": 1350,
+     "output_tokens": 200,
+     "input_tokens_cache_read": 400,
+     "total_tokens": 1200
+    }
+   },
+   "total_time": 4.802,
+   "error": null
+  },
+  {
+   "id": "task-8",
+   "epoch": 1,
+   "input": "q",
+   "target": "a",
+   "scores": {
+    "match": {
+     "value": "I"
+    }
+   },
+   "model_usage": {
+    "gpt-oss-120b": {
+     "input_tokens": 1400,
+     "output_tokens": 200,
+     "input_tokens_cache_read": 400,
+     "total_tokens": 1200
+    }
+   },
+   "total_time": 2.226,
+   "error": null
+  },
+  {
+   "id": "task-8",
+   "epoch": 2,
+   "input": "q",
+   "target": "a",
+   "scores": {
+    "match": {
+     "value": "I"
+    }
+   },
+   "model_usage": {
+    "gpt-oss-120b": {
+     "input_tokens": 1400,
+     "output_tokens": 200,
+     "input_tokens_cache_read": 400,
+     "total_tokens": 1200
+    }
+   },
+   "total_time": 4.178,
+   "error": null
+  },
+  {
+   "id": "task-8",
+   "epoch": 3,
+   "input": "q",
+   "target": "a",
+   "scores": {
+    "match": {
+     "value": "I"
+    }
+   },
+   "model_usage": {
+    "gpt-oss-120b": {
+     "input_tokens": 1400,
+     "output_tokens": 200,
+     "input_tokens_cache_read": 400,
+     "total_tokens": 1200
+    }
+   },
+   "total_time": 2.574,
+   "error": null
+  },
+  {
+   "id": "task-8",
+   "epoch": 4,
+   "input": "q",
+   "target": "a",
+   "scores": {
+    "match": {
+     "value": "I"
+    }
+   },
+   "model_usage": {
+    "gpt-oss-120b": {
+     "input_tokens": 1400,
+     "output_tokens": 200,
+     "input_tokens_cache_read": 400,
+     "total_tokens": 1200
+    }
+   },
+   "total_time": 2.176,
+   "error": null
+  },
+  {
+   "id": "task-8",
+   "epoch": 5,
+   "input": "q",
+   "target": "a",
+   "scores": {
+    "match": {
+     "value": "I"
+    }
+   },
+   "model_usage": {
+    "gpt-oss-120b": {
+     "input_tokens": 1400,
+     "output_tokens": 200,
+     "input_tokens_cache_read": 400,
+     "total_tokens": 1200
+    }
+   },
+   "total_time": 2.819,
+   "error": null
+  },
+  {
+   "id": "task-9",
+   "epoch": 1,
+   "input": "q",
+   "target": "a",
+   "scores": {
+    "match": {
+     "value": "C"
+    }
+   },
+   "model_usage": {
+    "gpt-oss-120b": {
+     "input_tokens": 1450,
+     "output_tokens": 200,
+     "input_tokens_cache_read": 400,
+     "total_tokens": 1200
+    }
+   },
+   "total_time": 4.626,
+   "error": null
+  },
+  {
+   "id": "task-9",
+   "epoch": 2,
+   "input": "q",
+   "target": "a",
+   "scores": {
+    "match": {
+     "value": "C"
+    }
+   },
+   "model_usage": {
+    "gpt-oss-120b": {
+     "input_tokens": 1450,
+     "output_tokens": 200,
+     "input_tokens_cache_read": 400,
+     "total_tokens": 1200
+    }
+   },
+   "total_time": 3.567,
+   "error": null
+  },
+  {
+   "id": "task-9",
+   "epoch": 3,
+   "input": "q",
+   "target": "a",
+   "scores": {
+    "match": {
+     "value": "I"
+    }
+   },
+   "model_usage": {
+    "gpt-oss-120b": {
+     "input_tokens": 1450,
+     "output_tokens": 200,
+     "input_tokens_cache_read": 400,
+     "total_tokens": 1200
+    }
+   },
+   "total_time": 2.734,
+   "error": null
+  },
+  {
+   "id": "task-9",
+   "epoch": 4,
+   "input": "q",
+   "target": "a",
+   "scores": {
+    "match": {
+     "value": "C"
+    }
+   },
+   "model_usage": {
+    "gpt-oss-120b": {
+     "input_tokens": 1450,
+     "output_tokens": 200,
+     "input_tokens_cache_read": 400,
+     "total_tokens": 1200
+    }
+   },
+   "total_time": 4.642,
+   "error": null
+  },
+  {
+   "id": "task-9",
+   "epoch": 5,
+   "input": "q",
+   "target": "a",
+   "scores": {
+    "match": {
+     "value": "C"
+    }
+   },
+   "model_usage": {
+    "gpt-oss-120b": {
+     "input_tokens": 1450,
+     "output_tokens": 200,
+     "input_tokens_cache_read": 400,
+     "total_tokens": 1200
+    }
+   },
+   "total_time": 4.151,
+   "error": null
+  }
+ ]
+}

@@ -1,0 +1,11 @@
+name: gate-example
+on: { workflow_dispatch: }
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -e .
+      - run: passk gate --baseline examples/logs/sample_a.json --candidate examples/logs/sample_a_rerun.json --max-drop 0.15

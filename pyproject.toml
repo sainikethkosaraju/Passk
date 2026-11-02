@@ -1,0 +1,40 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "passk"
+version = "0.2.0"
+description = "Reliability (pass^k), cost and regression gating for Inspect AI eval logs."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Niketh" }]
+dependencies = []
+
+[project.optional-dependencies]
+otlp = ["opentelemetry-sdk==1.27.0", "opentelemetry-exporter-otlp-proto-http==1.27.0"]
+dev = ["pytest>=8", "hypothesis>=6", "ruff>=0.6", "pyright>=1.1.380"]
+
+[project.scripts]
+passk = "passk.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/passk"]
+[tool.hatch.build.targets.wheel.force-include]
+"data/prices" = "passk/_prices"
+
+[tool.ruff]
+line-length = 100
+src = ["src", "tests"]
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+ignore = ["UP007", "UP045", "E701", "E702", "E501", "B905"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.pyright]
+include = ["src"]
+pythonVersion = "3.10"

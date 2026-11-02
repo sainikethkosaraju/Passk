@@ -1,0 +1,21 @@
+{
+  "_meta": {
+    "date": "2026-11-02",
+    "source": "ILLUSTRATIVE placeholder values in LiteLLM cost-map format. Not authoritative: replace with a dated snapshot of the LiteLLM model_prices_and_context_window.json before publishing cost numbers."
+  },
+  "gpt-oss-120b": {
+    "input_cost_per_token": 1.5e-07,
+    "output_cost_per_token": 6.0e-07
+  },
+  "nemotron-3-super-120b-a12b": {
+    "input_cost_per_token": 3.0e-07,
+    "output_cost_per_token": 1.2e-06
+  },
+  "example-long-context": {
+    "input_cost_per_token": 1.0e-06,
+    "output_cost_per_token": 4.0e-06,
+    "cache_read_input_token_cost": 1.0e-07,
+    "input_cost_per_token_above_200k_tokens": 2.0e-06,
+    "output_cost_per_token_above_200k_tokens": 8.0e-06
+  }
+}

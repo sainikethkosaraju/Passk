@@ -1,0 +1,5 @@
+{"name": "capital-cities", "data_source_config": {"type": "custom"},
+ "testing_criteria": [
+  {"type": "string_check", "name": "exact", "operation": "eq", "reference": "{{item.ideal}}", "input": "{{sample.output_text}}"},
+  {"type": "label_model", "name": "tone", "model": "gpt-4.1", "labels": ["polite", "rude"]}
+ ]}
