@@ -1,0 +1,3 @@
+# OpenAI Evals importer
+`passk import-openai EXPORT_DIR --out DIR` understands (a) an Evals API export (`eval.json` + `data.jsonl`) and (b) a legacy `openai/evals` layout (`samples.jsonl` + `eval.yaml`). Both layouts are **reconstructed from public API/repo shapes**, not a vendor file spec; adapt `importers/openai_evals.py` if yours differs.
+Mapping: `string_check` eq/like/ilike -> `exact()`/`includes()`; `text_similarity` -> `passk.scorers.fuzzy_match` (difflib; approximate); `label_model` -> `model_graded_qa()` (labels not carried; approximate); legacy `Match/Includes/FuzzyMatch`. `python` graders, custom references and extra item fields are listed under "Not converted". The generated task is exercised in Inspect by the test-suite.

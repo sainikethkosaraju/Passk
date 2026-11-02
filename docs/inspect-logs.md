@@ -1,0 +1,3 @@
+# Inspect log fields used
+Validated on logs written by real `inspect-ai 0.3.287` (`mockllm`), both `.json` and `.eval`. `.eval` is a zip whose members are **zstd-compressed (method 93)**, which Python's `zipfile` cannot read; `passk._zipzstd` locates member bytes via the central directory and decompresses with `zstandard` (extra `passk[eval]`). Fields read: `eval.task/model/run_id`, `status`, per sample `id, epoch, scores, model_usage (input/output/cache-read/reasoning), total_time, error, limit, messages`. Unknown sample fields are listed in the report warnings.
+Generating the committed logs: `python examples/make_inspect_logs.py DIR` (a whitespace tokenizer replaces tiktoken's vocabulary download when the network blocks it; this only affects token counts).

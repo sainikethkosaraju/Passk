@@ -1,0 +1,3 @@
+{"item": {"input": [{"role": "user", "content": "Capital of France?"}], "ideal": "Paris", "difficulty": 1}}
+{"item": {"input": "Capital of Japan?", "ideal": "Tokyo"}}
+{"item": {"input": "Unlabelled question"}}
