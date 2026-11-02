@@ -48,7 +48,7 @@ inspect_ext.py: hook (reports) + ModelAPI "passk" (record/replay)       importer
 | Cost matches hand computation incl. cached + long-context tiers | `tests/test_logs_cost.py` |
 
 ### Live runs
-- Collector and smoke workflow ran against a real hosted model (`nvidia/nemotron-3-ultra-550b-a55b`): 25 trials, 0 errors, [run log](https://github.com/sainikethkosaraju/Passk/actions/runs/41409208959). The task was trivial arithmetic, so pass^1 = 1.0 says the pipeline works, not that the model is reliable. Provider terms have not been reviewed, so no model numbers are published as results.
+- Collector and smoke workflow ran against a real hosted model (`nvidia/nemotron-3-ultra-550b-a55b`): 25 trials, 0 errors, [run log](https://github.com/sainikethkosaraju/Passk/actions/runs/41409208959). The task was trivial arithmetic, so pass^1 = 1.0 says the pipeline works, not that the model is reliable. The NVIDIA API trial terms limit use to internal testing and evaluation and bar redistributing generated content, so this repository publishes only aggregate pipeline checks, never raw model outputs or model leaderboards.
 
 ## Limitations
 - Evaluated on **mock-model logs** produced by real Inspect (`mockllm`): they validate parsing and statistics, not any real model's behaviour. No real-model benchmark is published here.

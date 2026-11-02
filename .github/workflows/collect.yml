@@ -56,11 +56,14 @@ jobs:
         run: passk report collected --out report --alias "openai/$MODEL=$MODEL"
       - uses: actions/upload-artifact@v4
         with:
-          name: collected-${{ github.run_id }}
-          path: |
-            collected
-            report
-      # Optional: open a pull request with the logs. Needs Settings -> Actions -> General ->
+          name: report-${{ github.run_id }}
+          retention-days: 7
+          # Aggregate report only. Raw logs contain model output; public-repo artifacts are world-downloadable and
+          # NVIDIA's trial terms (s4.2) forbid making Generated Content available to others.
+          path: report
+      # Optional: open a pull request with the logs. Do NOT enable this for providers whose terms forbid
+      # redistributing generated content (NVIDIA trial, s4.2); logs contain raw model output.
+      # Original note: Needs Settings -> Actions -> General ->
       # "Allow GitHub Actions to create and approve pull requests", then set the repository variable COLLECT_OPEN_PR=true.
       - uses: peter-evans/create-pull-request@v6
         if: ${{ vars.COLLECT_OPEN_PR == 'true' }}
